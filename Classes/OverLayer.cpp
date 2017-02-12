@@ -1,11 +1,5 @@
 #include "OverLayer.h"
 
-void OverLayer::setScore(int _score)
-{
-	score = _score;
-	scoreLabel->setString(String::createWithFormat("%d", score)->getCString());
-}
-
 // on "init" you need to initialize your instance
 bool OverLayer::init()
 {
@@ -25,11 +19,11 @@ bool OverLayer::init()
 
 	this->addChild(overPanel);
 
-	//Score
-	scoreLabel = LabelTTF::create("0", "fonts/Minecrafter.ttf", 120);
-	scoreLabel->setPosition(origin.x + visibleSize.width / 2, overPanel->getPositionY());
+	// score
+	_scoreLabel = LabelTTF::create("0", "fonts/Minecrafter.ttf", 120);
+	_scoreLabel->setPosition(origin.x + visibleSize.width / 2, overPanel->getPositionY());
 
-	this->addChild(scoreLabel);
+	this->addChild(_scoreLabel);
 
 	//Button
 	auto menuBtn = MenuItemImage::create("MenuBtn.png", "MenuBtn_Selected.png", CC_CALLBACK_0(OverLayer::gotoMenuScene, this));
@@ -55,4 +49,10 @@ void OverLayer::gotoPlayScene()
 {
 	auto playscene = PlayScene::createScene();
 	Director::getInstance()->replaceScene(playscene);
+}
+
+void OverLayer::setScore(int score)
+{
+	_score = score;
+	_scoreLabel->setString(String::createWithFormat("%d", score)->getCString());
 }

@@ -15,13 +15,14 @@ public:
     // implement the "static create()" method manually
 	CREATE_FUNC(OverLayer);
 
-	void setScore(int _score);
+	void setScore(int score);
 
 private:
 	void gotoMenuScene(); 
 	void gotoPlayScene();
-	int score;
-	LabelTTF* scoreLabel;
+
+	int _score;
+	LabelTTF* _scoreLabel;
 };
 
 #endif // __OVER_LAYER_H__

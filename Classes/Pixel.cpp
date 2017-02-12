@@ -1,77 +1,91 @@
 #include "Pixel.h"
 
-Pixel::Pixel(Layer* layer)
+bool Pixel::init()
 {
-	origin = Director::getInstance()->getVisibleOrigin();
-	visibleSize = Director::getInstance()->getVisibleSize();
+	if (!this->initWithFile("Pixel.png"))
+	{
+		return false;
+	}
 
-	pixelTexture = Sprite::create("Pixel.png");
-	pixelTexture->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+	auto origin = Director::getInstance()->getVisibleOrigin();
+	_visibleSize = Director::getInstance()->getVisibleSize();
 
-	pixelBody = PhysicsBody::createBox(pixelTexture->getContentSize(), PhysicsMaterial(0,0,0));
-	//I am a pixel
-	pixelBody->setCategoryBitmask(eObjectBitmask::PIXEL);
-	//I collide with ...
-	//pixelBody->setCollisionBitmask(eObjectBitmask::PIPE);
-	pixelBody->setContactTestBitmask(eObjectBitmask::PIPE | eObjectBitmask::LINE);
+	this->setPosition(origin.x + _visibleSize.width / 2, origin.y + _visibleSize.height / 2);
 
-	//////////////////////
+	auto body = PhysicsBody::createBox(this->getContentSize(), PhysicsMaterial(0, 0, 0));
 
-	pixelTexture->setPhysicsBody(pixelBody);
+	// I am a pixel
+	body->setCategoryBitmask(eObjectBitmask::PIXEL);
+	// I collide with ...
+	body->setCollisionBitmask(0);
+	body->setContactTestBitmask(eObjectBitmask::PIPE | eObjectBitmask::LINE);
 
-	layer->addChild(pixelTexture, 100);
+	this->setPhysicsBody(body);
 
-	isFalling = true;
+	_isDead = false;
+	_isFalling = true;
 
-	velocity = Vec2(0, 0);
-	rotation = 0.0f;
+	_velocity = Vec2(0, 0);
+	_rotation = 0.0f;
 
-	isDead = false;
+	// update
+	this->scheduleUpdate();
+
+	return true;
 }
 
-void Pixel::Update()
+void Pixel::update(float dt)
 {
-	if (isFalling)
+	if (_isFalling)
 	{
-		if (pixelTexture->getPositionY() > pixelTexture->getContentSize().height / 2)
+		if (this->getPositionY() > this->getContentSize().height / 2)
 		{
-			velocity.y += -1;
-			rotation += 3;
+			_velocity.y += -1;
+			_rotation += 3;
 		}
 		else
 		{
-			velocity.y = 0;
-			rotation = 0;
+			_velocity.y = 0;
+			_rotation = 0;
+			_isDead = true;
 
-			pixelTexture->setPositionY(pixelTexture->getContentSize().height / 2);
-
-			isDead = true;
+			this->setPositionY(this->getContentSize().height / 2);
 		}
 	}
 	else
 	{
-		if (pixelTexture->getPositionY() < visibleSize.height - pixelTexture->getContentSize().height / 2)
+		if (this->getPositionY() < _visibleSize.height - this->getContentSize().height / 2)
 		{
-			velocity.y = 10;
-			rotation += -10;
+			_velocity.y = 10;
+			_rotation += -10;
 		}
 		else
 		{
-			velocity.y = 0;
-			rotation = 0;
+			_velocity.y = 0;
+			_rotation = 0;
 		}
 	}
 
-	pixelTexture->setPosition(Point(pixelTexture->getPositionX(), pixelTexture->getPositionY() + velocity.y));
-	pixelTexture->setRotation(rotation);
+	this->setPosition(Vec2(this->getPositionX(), this->getPositionY() + _velocity.y));
+	this->setRotation(_rotation);
 }
 
-void Pixel::Flap()
+void Pixel::flap()
 {
-	isFalling = false;
+	_isFalling = false;
 }
 
-void Pixel::Fall()
+void Pixel::fall()
 {
-	isFalling = true;
+	_isFalling = true;
+}
+
+void Pixel::setDead(bool dead)
+{
+	_isDead = dead;
+}
+
+bool Pixel::isDead()
+{
+	return _isDead;
 }

@@ -6,22 +6,21 @@
 
 USING_NS_CC;
 
-class Pipe
+class Pipe : public Node
 {
 public:
-	Pipe(Layer* layer);
+	CREATE_FUNC(Pipe);
+	virtual bool init() override;
+	virtual void pause() override;
+
 	void moveFinished();
-	bool isMoveFinished;
 
 private:
-	Sprite* topTexture, *bottomTexture;
+	Sprite* _topPipe;
+	Sprite* _bottomPipe;
 	
-	Size visibleSize;
-	Vec2 origin;
-
-	float velocity;
-	float endPositionX;
-	
+	float _velocity;
+	float _endPositionX;
 };
 
 #endif //__PIPE_H__

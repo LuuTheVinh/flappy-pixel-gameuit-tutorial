@@ -1,41 +1,48 @@
 #include "Pipe.h"
 
-Pipe::Pipe(Layer* layer)
+bool Pipe::init()
 {
-	origin = Director::getInstance()->getVisibleOrigin();
-	visibleSize = Director::getInstance()->getVisibleSize();
+	auto origin = Director::getInstance()->getVisibleOrigin();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
 
-	velocity = 120;
+	_velocity = 120;
 
-	bottomTexture = Sprite::create("Pipe.png");
-	float randomY = RandomHelper::random_int(-(int)(bottomTexture->getContentSize().height / 4), (int)(bottomTexture->getContentSize().height / 3));
+	// bottom pipe
+	_bottomPipe = Sprite::create("Pipe.png");
+	
+	int minY = -(int)(_bottomPipe->getContentSize().height / 4);
+	int maxY = (int)(_bottomPipe->getContentSize().height / 3);
+	float randomY = RandomHelper::random_int(minY, maxY);
 
-	bottomTexture->setPosition(origin.x + visibleSize.width + bottomTexture->getContentSize().width / 2, origin.y + randomY);
+	_bottomPipe->setPosition(origin.x + visibleSize.width + _bottomPipe->getContentSize().width / 2, origin.y + randomY);
 
-	auto bottomBody = PhysicsBody::createBox(bottomTexture->getContentSize(), PhysicsMaterial(0, 0, 0));
+	auto bottomBody = PhysicsBody::createBox(_bottomPipe->getContentSize(), PhysicsMaterial(0, 0, 0));
 	bottomBody->setDynamic(false);
 	bottomBody->setCategoryBitmask(eObjectBitmask::PIPE);
 	bottomBody->setCollisionBitmask(0);
 	bottomBody->setContactTestBitmask(eObjectBitmask::PIXEL);
 
-	bottomTexture->setPhysicsBody(bottomBody);
+	_bottomPipe->setPhysicsBody(bottomBody);
 
-	layer->addChild(bottomTexture);
+	this->addChild(_bottomPipe);
 
-	topTexture = Sprite::create("Pipe.png");
-	topTexture->setPosition(bottomTexture->getPositionX(), bottomTexture->getPositionY() + topTexture->getContentSize().height + 220);
+	// top pipe
+	_topPipe = Sprite::create("Pipe.png");
+	_topPipe->setPosition(_bottomPipe->getPositionX(), _bottomPipe->getPositionY() + _topPipe->getContentSize().height + 220);
 
-	auto topBody = PhysicsBody::createBox(topTexture->getContentSize(), PhysicsMaterial(0, 0, 0));
+	auto topBody = PhysicsBody::createBox(_topPipe->getContentSize(), PhysicsMaterial(0, 0, 0));
 	topBody->setDynamic(false);
 	topBody->setCategoryBitmask(eObjectBitmask::PIPE);
 	topBody->setCollisionBitmask(0);
 	topBody->setContactTestBitmask(eObjectBitmask::PIXEL);
 
-	topTexture->setPhysicsBody(topBody);
+	_topPipe->setPhysicsBody(topBody);
 
-	//Score Line
+	this->addChild(_topPipe);
+
+	// score line
 	auto scoreline = Node::create();
-	scoreline->setPosition(Point(bottomTexture->getContentSize().width, bottomTexture->getContentSize().height + 110));
+	scoreline->setPosition(Point(_bottomPipe->getContentSize().width, _bottomPipe->getContentSize().height + 110));
 	auto linebody = PhysicsBody::createBox(Size(1, 300), PhysicsMaterial(0, 0, 0));
 	linebody->setDynamic(false);
 
@@ -44,22 +51,35 @@ Pipe::Pipe(Layer* layer)
 	linebody->setContactTestBitmask(eObjectBitmask::PIXEL);
 
 	scoreline->setPhysicsBody(linebody);
-	bottomTexture->addChild(scoreline);
 
-	//Move
-	endPositionX = origin.x - bottomTexture->getContentSize().width / 2;
-	isMoveFinished = false;
+	_bottomPipe->addChild(scoreline);
 
-	bottomTexture->runAction(Sequence::createWithTwoActions(MoveTo::create(visibleSize.width / velocity, Point(endPositionX, bottomTexture->getPositionY())), CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
-	topTexture->runAction(Sequence::createWithTwoActions(MoveTo::create(visibleSize.width / velocity, Point(endPositionX, topTexture->getPositionY())), CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
+	// move
+	_endPositionX = origin.x - _bottomPipe->getContentSize().width / 2;
 
-	layer->addChild(topTexture);
+	float time = visibleSize.width / _velocity;
+	auto topEndPosition = Vec2(_endPositionX, _topPipe->getPositionY());
+	auto botEndPosition = Vec2(_endPositionX, _bottomPipe->getPositionY());
+
+	_bottomPipe->runAction(Sequence::createWithTwoActions(MoveTo::create(time, botEndPosition) , CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
+	_topPipe->runAction(Sequence::createWithTwoActions(MoveTo::create(time, topEndPosition), CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
+
+	return true;
+}
+
+void Pipe::pause()
+{
+	Node::pause();
+
+	// pause children
+	auto childen = this->getChildren();
+	for (auto child : childen)
+	{
+		child->pause();
+	}
 }
 
 void Pipe::moveFinished()
 {
-	topTexture->removeFromParent();
-	bottomTexture->removeFromParent();
-
-	isMoveFinished = true;
+	this->removeFromParent();
 }

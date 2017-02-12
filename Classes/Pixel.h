@@ -6,25 +6,28 @@
 
 USING_NS_CC;
 
-class Pixel
+class Pixel : public Sprite
 {
 public:
-	Pixel(Layer* layer);
-	void Flap();
-	void Update();
-	void Fall();
-	bool isDead;
+	CREATE_FUNC(Pixel);
+
+	virtual bool init() override;
+	virtual void update(float dt) override;
+
+	void flap();
+	void fall();
+
+	void setDead(bool dead);
+	bool isDead();
 
 private:
-	Sprite* pixelTexture;
-	PhysicsBody* pixelBody;
+	Size _visibleSize;
 
-	Size visibleSize;
-	Vec2 origin;
+	bool _isDead;
+	bool _isFalling;
 
-	bool isFalling;
-	Vec2 velocity;
-	float rotation;
+	Vec2 _velocity;
+	float _rotation;
 };
 
 #endif //__PIXEL_H__
