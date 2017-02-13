@@ -82,8 +82,8 @@ void PlayScene::update(float dt)
 		this->removeChild(_scoreLabel);
 		this->pause();
 
-		auto childen = this->getChildren();
-		for (auto child : childen)
+		auto children = this->getChildren();
+		for (auto child : children)
 		{
 			child->pause();
 		}

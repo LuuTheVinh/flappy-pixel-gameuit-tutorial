@@ -14,7 +14,7 @@ bool Pipe::init()
 	int maxY = (int)(_bottomPipe->getContentSize().height / 3);
 	float randomY = RandomHelper::random_int(minY, maxY);
 
-	_bottomPipe->setPosition(origin.x + visibleSize.width + _bottomPipe->getContentSize().width / 2, origin.y + randomY);
+	_bottomPipe->setPosition(0.0f, randomY);
 
 	auto bottomBody = PhysicsBody::createBox(_bottomPipe->getContentSize(), PhysicsMaterial(0, 0, 0));
 	bottomBody->setDynamic(false);
@@ -54,15 +54,16 @@ bool Pipe::init()
 
 	_bottomPipe->addChild(scoreline);
 
-	// move
-	_endPositionX = origin.x - _bottomPipe->getContentSize().width / 2;
+	// set position
+	this->setPosition(origin.x + visibleSize.width + _bottomPipe->getContentSize().width / 2, origin.y);
+
+	// move to end position
+	_endPositionX = -_bottomPipe->getContentSize().width / 2;
 
 	float time = visibleSize.width / _velocity;
-	auto topEndPosition = Vec2(_endPositionX, _topPipe->getPositionY());
-	auto botEndPosition = Vec2(_endPositionX, _bottomPipe->getPositionY());
+	auto endPosition = Vec2(_endPositionX, this->getPositionY());
 
-	_bottomPipe->runAction(Sequence::createWithTwoActions(MoveTo::create(time, botEndPosition) , CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
-	_topPipe->runAction(Sequence::createWithTwoActions(MoveTo::create(time, topEndPosition), CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
+	this->runAction(Sequence::createWithTwoActions(MoveTo::create(time, endPosition), CallFunc::create(CC_CALLBACK_0(Pipe::moveFinished, this))));
 
 	return true;
 }
@@ -72,8 +73,8 @@ void Pipe::pause()
 	Node::pause();
 
 	// pause children
-	auto childen = this->getChildren();
-	for (auto child : childen)
+	auto children = this->getChildren();
+	for (auto child : children)
 	{
 		child->pause();
 	}
